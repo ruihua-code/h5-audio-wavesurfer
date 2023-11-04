@@ -74,6 +74,11 @@
         <div id="waveform"></div>
       </div>
       <div class="audio-list">
+        <div>
+          <label for="networkUrl">输入音频网络地址:</label>
+          <input type="url" name="" id="networkUrl" />
+          <button onclick="onLoadNetworkAudio()">加载</button>
+        </div>
         <input
           type="file"
           id="uploadAudio"
@@ -83,7 +88,7 @@
         />
 
         <button class="btn-select-audio" onclick="onSelectAudio()">
-          选择音频
+          选择本地音频
         </button>
         <ul class="list" onclick="onPlay(event)"></ul>
       </div>
@@ -156,6 +161,18 @@
 
         wavesurfer.loadBlob(audioList[index]).then((res) => {
           wavesurfer.play();
+        });
+      }
+
+      function onLoadNetworkAudio() {
+        const audioUrl = document.getElementById("networkUrl");
+
+        wavesurfer.load(audioUrl.value).then((res) => {
+          wavesurfer.play();
+          // audioUrl.value = "";
+          arrAudio = audioUrl.value.split("/");
+
+          localStorage.setItem(`${arrAudio.pop()}`, audioUrl.value);
         });
       }
     </script>
