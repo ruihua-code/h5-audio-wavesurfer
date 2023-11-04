@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>audio-play</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        padding: 0;
+        margin: 0;
+        background-color: #1c1c1c;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+      #waveform {
+        /* height: 100px; */
+        width: 100%;
+        flex-basis: 50vw;
+      }
+      .btn-select-audio {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 6px 10px;
+        border-radius: 0;
+      }
+      .media-box {
+        height: 100vh;
+        display: flex;
+      }
+      .audio-list {
+        width: 50vw;
+        border-left: 1px solid #b5b5b5;
+        color: #fff;
+        padding: 10px;
+      }
+      .audio-list .list {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        padding: 10px 20px;
+      }
+      .audio-list .list > li {
+        list-style: decimal;
+        cursor: pointer;
+        transition: color 0.4s;
+      }
+      .audio-list .list > li:hover {
+        color: orange;
+      }
+      .waveform-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        width: 50vw;
+      }
+      audio::-webkit-media-controls-panel {
+        background-color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="media-box">
+      <div class="waveform-box">
+        <div id="waveform"></div>
+      </div>
+      <div class="audio-list">
+        <input
+          type="file"
+          id="uploadAudio"
+          multiple
+          hidden
+          oninput="onAudioChange()"
+        />
+
+        <button class="btn-select-audio" onclick="onSelectAudio()">
+          选择音频
+        </button>
+        <ul class="list" onclick="onPlay(event)"></ul>
+      </div>
+    </div>
+
+    <script>
+      let wavesurfer = null;
+      let audioList = [];
+      function onInit() {
+        wavesurfer = WaveSurfer.create({
+          container: "#waveform",
+          splitChannels: false,
+          normalize: false,
+          waveColor: "#1aff53",
+          progressColor: "#4d4d4d",
+          cursorColor: "#ddd5e9",
+          cursorWidth: 2,
+          barWidth: 12,
+          barGap: 5,
+          barRadius: 12,
+          barHeight: 0.9,
+          barAlign: "", // bottom top
+          minPxPerSec: 120,
+          fillParent: true,
+          mediaControls: true,
+          autoplay: false,
+          interact: true,
+          dragToSeek: false,
+          hideScrollbar: true,
+          audioRate: 1,
+          autoScroll: true,
+          autoCenter: true,
+          sampleRate: 8000,
+        });
+      }
+
+      onInit();
+
+      // 选择音频文件
+      function onSelectAudio() {
+        const eleInputFile = document.getElementById("uploadAudio");
+        eleInputFile.click();
+      }
+
+      function onAudioChange() {
+        const eleInputFile = document.getElementById("uploadAudio");
+        const eleAudioList = document.querySelector(".audio-list .list");
+
+        audioList = [];
+        for (let [index, audio] of Array.from(eleInputFile.files).entries()) {
+          audioList.push(new Blob([audio], { type: audio.type }));
+          const li = document.createElement("li");
+          li.innerText = audio.name;
+          li.dataset.index = index;
+          eleAudioList.appendChild(li);
+        }
+
+        const audioFile = eleInputFile.files[0];
+
+        const blob = new Blob([audioFile], { type: audioFile.type });
+        wavesurfer.loadBlob(blob).then((res) => {
+          console.log(res);
+          wavesurfer.play();
+        });
+      }
+
+      // 选择新音频播放
+      function onPlay(e) {
+        const index = e.target.dataset.index;
+
+        wavesurfer.loadBlob(audioList[index]).then((res) => {
+          wavesurfer.play();
+        });
+      }
+    </script>
+  </body>
+</html>
